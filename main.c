@@ -150,6 +150,27 @@ void create_new_node(int x, int y) {
 }
 
 
+NODE *find_minimal(){
+    NODE *res;
+    int minimal = INT_MAX;
+    NODE *header = root_main->next_h;
+    while (header != NULL){
+        int count = 0;
+        NODE* j = header;
+        while (j->next_v != NULL){
+            count++;
+            j = j->next_v;
+        }
+        if (count < minimal){
+            minimal = count;
+            res = header;
+        }
+        header = header->next_h;
+    }
+    return res;
+}
+
+
 void algorithm_x(){
     if (is_ready) return;
     NODE* temp = root_main;
@@ -164,7 +185,7 @@ void algorithm_x(){
         return;
     }
     if (root_main->next_v == NULL) return;
-    NODE *interested_column = root_main->next_h->next_v;
+    NODE *interested_column = find_minimal() -> next_v;
     while (interested_column != NULL && !is_ready){
         STACK *death_stack_rows = create_stack();
         STACK *death_stack_columns = create_stack();
@@ -175,6 +196,9 @@ void algorithm_x(){
             i = i->next_h;
         }
         NODE *interested_row = find_root_horizontal(interested_column);
+        if (interested_row == root_main){
+            int c=0;
+        }
         push(result, interested_row);
         i = interested_row->next_h;
         while (i != NULL){
@@ -190,12 +214,13 @@ void algorithm_x(){
             remove_column(death_stack_columns->data[index]);
         }
         algorithm_x();
-        if (!is_ready) pop(result);
+        if (!is_ready)
+            pop(result);
         for (int index=0; index<death_stack_columns->length;index++){
-            restore_column(pop(death_stack_columns));
+            restore_column(death_stack_columns->data[index]);
         }
         for(int index=0; index<death_stack_rows->length; index++){
-            restore_row(pop(death_stack_rows));
+            restore_row(death_stack_rows->data[index]);
         }
         interested_column = interested_column->next_v;
         delete_stack(death_stack_columns);
@@ -227,9 +252,9 @@ int main(void) {
     root_nodes_h[0]->prev_h = root_main;
     root_nodes_v[0]->prev_v = root_main;
 
-    create_new_node(3, 0);
-    create_new_node(6, 0);
-    create_new_node(7, 0);
+    create_new_node(0, 0);
+    create_new_node(1, 0);
+    create_new_node(2, 0);
     create_new_node(7, 1);
     create_new_node(10, 1);
     create_new_node(11, 1);
@@ -251,9 +276,9 @@ int main(void) {
     create_new_node(2, 7);
     create_new_node(6, 7);
     create_new_node(7, 7);
-    create_new_node(0, 8);
-    create_new_node(1, 8);
-    create_new_node(2, 8);
+    create_new_node(3, 8);
+    create_new_node(6, 8);
+    create_new_node(7, 8);
     create_new_node(4, 9);
     create_new_node(8, 9);
     create_new_node(9, 9);
