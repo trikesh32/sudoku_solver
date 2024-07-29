@@ -217,10 +217,10 @@ void algorithm_x(){
         algorithm_x();
         if (!is_ready) pop(result);
         for (int index=0; index<death_stack_columns->length;index++){
-            restore_column(pop(death_stack_columns));
+            restore_column(death_stack_columns->data[index]);
         }
         for(int index=0; index<death_stack_rows->length; index++){
-            restore_row(pop(death_stack_rows));
+            restore_row(death_stack_rows->data[index]);
         }
         interested_column = interested_column->next_v;
         delete_stack(death_stack_columns);
