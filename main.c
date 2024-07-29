@@ -59,7 +59,8 @@ void remove_column(NODE *root_column_node){
     NODE* actual = root_column_node;
     while (actual != NULL){
         actual->prev_h->next_h = actual->next_h;
-        actual->next_h->prev_h = actual->prev_h;
+        if (actual->next_h != NULL)
+            actual->next_h->prev_h = actual->prev_h;
         actual = actual->next_v;
     }
 }
@@ -67,7 +68,8 @@ void restore_column(NODE *root_column_node){
     NODE *actual = root_column_node;
     while(actual != NULL){
         actual->prev_h->next_h = actual;
-        actual->next_h->prev_h = actual;
+        if (actual->next_h != NULL)
+            actual->next_h->prev_h = actual;
         actual = actual->next_v;
     }
 }
@@ -148,6 +150,27 @@ void create_new_node(int x, int y) {
 }
 
 
+NODE *find_minimal(){
+    NODE *res;
+    int minimal = INT_MAX;
+    NODE *header = root_main->next_h;
+    while (header != NULL){
+        int count = 0;
+        NODE* j = header;
+        while (j->next_v != NULL){
+            count++;
+            j = j->next_v;
+        }
+        if (count < minimal){
+            minimal = count;
+            res = header;
+        }
+        header = header->next_h;
+    }
+    return res;
+}
+
+
 void algorithm_x(){
     if (is_ready) return;
     NODE* temp = root_main;
@@ -162,7 +185,8 @@ void algorithm_x(){
         return;
     }
     if (root_main->next_v == NULL) return;
-    NODE *interested_column = root_main->next_h->next_v;
+    NODE *interested_column = find_minimal() -> next_v;
+
     while (interested_column != NULL && !is_ready){
         STACK *death_stack_rows = create_stack();
         STACK *death_stack_columns = create_stack();
@@ -173,6 +197,9 @@ void algorithm_x(){
             i = i->next_h;
         }
         NODE *interested_row = find_root_horizontal(interested_column);
+        if (interested_row == root_main){
+            int c=0;
+        }
         push(result, interested_row);
         i = interested_row->next_h;
         while (i != NULL){
