@@ -4,8 +4,8 @@
 #include <math.h>
 
 #define N 9
-#define HORIZONTAL_LENGTH (4 * N * N)
-#define VERTICAL_LENGTH (N * N * N)
+#define HORIZONTAL_LENGTH (12)
+#define VERTICAL_LENGTH (12)
 #define DEFAULT_STACK_SIZE 10
 
 typedef struct node {
@@ -59,7 +59,8 @@ void remove_column(NODE *root_column_node){
     NODE* actual = root_column_node;
     while (actual != NULL){
         actual->prev_h->next_h = actual->next_h;
-        actual->next_h->prev_h = actual->prev_h;
+        if (actual-> next_h != NULL)
+            actual->next_h->prev_h = actual->prev_h;
         actual = actual->next_v;
     }
 }
@@ -67,7 +68,8 @@ void restore_column(NODE *root_column_node){
     NODE *actual = root_column_node;
     while(actual != NULL){
         actual->prev_h->next_h = actual;
-        actual->next_h->prev_h = actual;
+        if (actual->next_h != NULL)
+            actual->next_h->prev_h = actual;
         actual = actual->next_v;
     }
 }
@@ -225,26 +227,50 @@ int main(void) {
     root_nodes_h[0]->prev_h = root_main;
     root_nodes_v[0]->prev_v = root_main;
 
-    int v_counter = 0;
-    for (int num = 0; num < N; ++num) {
-        for (int y = 0; y < N; ++y) {
-            for (int x = 0; x < N; ++x) {
-                create_new_node(y * N + x, v_counter);
-                create_new_node((N * N) + y * N + num, v_counter);
-                create_new_node((2 * N * N) + x * N + num, v_counter);
+    create_new_node(3, 0);
+    create_new_node(6, 0);
+    create_new_node(7, 0);
+    create_new_node(7, 1);
+    create_new_node(10, 1);
+    create_new_node(11, 1);
+    create_new_node(6, 2);
+    create_new_node(9, 2);
+    create_new_node(10, 2);
+    create_new_node(0, 3);
+    create_new_node(1, 3);
+    create_new_node(3, 3);
+    create_new_node(5, 4);
+    create_new_node(6, 4);
+    create_new_node(10, 4);
+    create_new_node(4, 5);
+    create_new_node(5, 5);
+    create_new_node(8, 5);
+    create_new_node(2, 6);
+    create_new_node(5, 6);
+    create_new_node(6, 6);
+    create_new_node(2, 7);
+    create_new_node(6, 7);
+    create_new_node(7, 7);
+    create_new_node(0, 8);
+    create_new_node(1, 8);
+    create_new_node(2, 8);
+    create_new_node(4, 9);
+    create_new_node(8, 9);
+    create_new_node(9, 9);
+    create_new_node(6, 10);
+    create_new_node(7, 10);
+    create_new_node(11, 10);
+    create_new_node(6, 11);
+    create_new_node(10, 11);
+    create_new_node(11, 11);
 
-                int n_sqrt = (int)(sqrt(N));
-                int n_box = x / n_sqrt + n_sqrt * (y / n_sqrt);
-                create_new_node((3 * N * N) + n_box * N + num, v_counter);
-                v_counter++;
 
-            }
-        }
-    }
     result = create_stack();
     algorithm_x();
     printf("%d", result->length);
-
+    for (int i=0;i<result->length; ++i){
+        printf("%d %d\n", result->data[i]->index_h, result->data[i]->index_v);
+    }
     for (int i = 0; i < HORIZONTAL_LENGTH; ++i) {
         free(root_nodes_h[i]);
     }
