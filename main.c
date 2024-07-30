@@ -237,30 +237,31 @@ void algorithm_x(){
         return;
     }
     if (root_main->next_v == NULL) return;
+    print_table(root_main);
     NODE *interested_column = find_minimal() -> next_v;
     while (interested_column != NULL && !is_ready){
         STACK *death_stack_rows = create_stack();
         STACK *death_stack_columns = create_stack();
 
-        NODE *i = interested_column;
+        NODE *i = find_root_horizontal(interested_column) ->next_h;
         while (i != NULL){
             push(death_stack_columns, find_root_vertical(i));
             i = i->next_h;
         }
         NODE *interested_row = find_root_horizontal(interested_column);
-        if (interested_row == root_main){
-            int c=0;
-        }
         push(result, interested_row);
+        printf("|%d|\n", interested_row->index_v);
         i = interested_row->next_h;
         while (i != NULL){
             NODE * j  = find_root_vertical(i)->next_v;
             while (j != NULL){
                 push(death_stack_rows, find_root_horizontal(j));
-                remove_row(find_root_horizontal(j));
                 j = j->next_v;
             }
             i = i->next_h;
+        }
+        for (int index=0;index<death_stack_rows->length;index++){
+            remove_row(death_stack_rows->data[index]);
         }
         for (int index=0;index<death_stack_columns->length;index++){
             remove_column(death_stack_columns->data[index]);
@@ -345,32 +346,10 @@ int main(void) {
     create_new_node(1, 12);
     create_new_node(2, 12);
     create_new_node(3, 12);
-    print_table(root_main);
 
-    remove_column(root_nodes_h[0]);
-    remove_column(root_nodes_h[5]);
-    remove_column(root_nodes_h[6]);
-    remove_column(root_nodes_h[8]);
-    remove_column(root_nodes_h[3]);
-    remove_row(root_nodes_v[0]);
-    remove_row(root_nodes_v[3]);
-    remove_row(root_nodes_v[6]);
-    remove_row(root_nodes_v[8]);
-    remove_row(root_nodes_v[12]);
-    restore_column(root_nodes_h[0]);
-    restore_column(root_nodes_h[5]);
-    restore_column(root_nodes_h[6]);
-    restore_column(root_nodes_h[8]);
-    restore_column(root_nodes_h[3]);
-    restore_row(root_nodes_v[0]);
-    restore_row(root_nodes_v[3]);
-    restore_row(root_nodes_v[6]);
-    restore_row(root_nodes_v[8]);
-    restore_row(root_nodes_v[12]);
-    print_table(root_main);
 
     result = create_stack();
-//    algorithm_x();
+    algorithm_x();
     printf("%d", result->length);
     for (int i=0;i<result->length; ++i){
         printf("%d %d\n", result->data[i]->index_h, result->data[i]->index_v);
