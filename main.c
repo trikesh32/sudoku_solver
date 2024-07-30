@@ -5,7 +5,7 @@
 
 #define N 9
 #define HORIZONTAL_LENGTH (12)
-#define VERTICAL_LENGTH (12)
+#define VERTICAL_LENGTH (13)
 #define DEFAULT_STACK_SIZE 10
 
 typedef struct node {
@@ -130,6 +130,58 @@ NODE * pop(STACK * stack){
     return stack->data[--stack->length];
 }
 
+int find_x_length(NODE *root_main){
+    int counter=0;
+    while (root_main->next_h != NULL){
+        counter++;
+        root_main = root_main->next_h;
+    }
+    return counter;
+}
+int find_y_length(NODE *root_main){
+    int counter = 0;
+    while (root_main->next_v != NULL){
+        counter++;
+        root_main = root_main->next_v;
+    }
+    return counter;
+}
+
+void print_table(NODE* root){
+    int x_length = find_x_length(root), y_length = find_y_length(root);
+    NODE *(*p)[x_length] = malloc(x_length * y_length * sizeof(NODE *));
+    memset(p, 0, x_length * y_length * sizeof(NODE *));
+    NODE *column = root->next_h;
+    printf("-1\t");
+    int jndex = 0;
+    while (column != NULL){
+        NODE * node = column->next_v;
+        printf("%d\t", column->index_h);
+        while (node != NULL){
+            int index = y_length - 1 - find_y_length(find_root_horizontal(node));
+            p[index][jndex] = node;
+            node = node -> next_v;
+        }
+        column = column->next_h;
+        jndex++;
+    }
+    printf("\n");
+    NODE* row = root->next_v;
+    for (int i=0; i<y_length; ++i){
+        printf("%d\t", row->index_v);
+        row = row->next_v;
+        for (int j=0; j<x_length;++j){
+            if (p[i][j] == NULL) printf("\t");
+            else printf("1\t");
+        }
+        printf("\n");
+    }
+    for (int i=0;i<100; ++i){
+        printf("=");
+    }
+    printf("\n");
+    free(p);
+}
 
 
 
@@ -173,13 +225,13 @@ NODE *find_minimal(){
 
 void algorithm_x(){
     if (is_ready) return;
-    NODE* temp = root_main;
-    int counter =0;
-    while (temp -> next_h != NULL){
-        temp = temp->next_h;
-        counter ++;
-    }
-    printf("%d\n", counter);
+//    NODE* temp = root_main;
+//    int counter =0;
+//    while (temp -> next_h != NULL){
+//        temp = temp->next_h;
+//        counter ++;
+//    }
+//    printf("%d\n", counter);
     if (root_main->next_h == NULL){
         is_ready = 1;
         return;
@@ -216,12 +268,13 @@ void algorithm_x(){
         algorithm_x();
         if (!is_ready)
             pop(result);
-        for (int index=0; index<death_stack_columns->length;index++){
-            restore_column(death_stack_columns->data[index]);
-        }
         for(int index=0; index<death_stack_rows->length; index++){
             restore_row(death_stack_rows->data[index]);
         }
+        for (int index=0; index<death_stack_columns->length;index++){
+            restore_column(death_stack_columns->data[index]);
+        }
+
         interested_column = interested_column->next_v;
         delete_stack(death_stack_columns);
         delete_stack(death_stack_rows);
@@ -288,10 +341,36 @@ int main(void) {
     create_new_node(6, 11);
     create_new_node(10, 11);
     create_new_node(11, 11);
+    create_new_node(0, 12);
+    create_new_node(1, 12);
+    create_new_node(2, 12);
+    create_new_node(3, 12);
+    print_table(root_main);
 
+    remove_column(root_nodes_h[0]);
+    remove_column(root_nodes_h[5]);
+    remove_column(root_nodes_h[6]);
+    remove_column(root_nodes_h[8]);
+    remove_column(root_nodes_h[3]);
+    remove_row(root_nodes_v[0]);
+    remove_row(root_nodes_v[3]);
+    remove_row(root_nodes_v[6]);
+    remove_row(root_nodes_v[8]);
+    remove_row(root_nodes_v[12]);
+    restore_column(root_nodes_h[0]);
+    restore_column(root_nodes_h[5]);
+    restore_column(root_nodes_h[6]);
+    restore_column(root_nodes_h[8]);
+    restore_column(root_nodes_h[3]);
+    restore_row(root_nodes_v[0]);
+    restore_row(root_nodes_v[3]);
+    restore_row(root_nodes_v[6]);
+    restore_row(root_nodes_v[8]);
+    restore_row(root_nodes_v[12]);
+    print_table(root_main);
 
     result = create_stack();
-    algorithm_x();
+//    algorithm_x();
     printf("%d", result->length);
     for (int i=0;i<result->length; ++i){
         printf("%d %d\n", result->data[i]->index_h, result->data[i]->index_v);
