@@ -129,7 +129,58 @@ NODE * pop(STACK * stack){
     if (stack->length == 0) return NULL;
     return stack->data[--stack->length];
 }
+int find_x_length(NODE *root_main){
+    int counter=0;
+    while (root_main->next_h != NULL){
+        counter++;
+        root_main = root_main->next_h;
+    }
+    return counter;
+}
+int find_y_length(NODE *root_main){
+    int counter = 0;
+    while (root_main->next_v != NULL){
+        counter++;
+        root_main = root_main->next_v;
+    }
+    return counter;
+}
 
+void print_table(NODE* root){
+    int x_length = find_x_length(root), y_length = find_y_length(root);
+    NODE *(*p)[x_length] = malloc(x_length * y_length * sizeof(NODE *));
+    memset(p, 0, x_length * y_length * sizeof(NODE *));
+    NODE *column = root->next_h;
+    printf("-1\t");
+    int jndex = 0;
+    while (column != NULL){
+        NODE * node = column->next_v;
+        printf("%d\t", column->index_h);
+        while (node != NULL){
+            int index = y_length - 1 - find_y_length(find_root_horizontal(node));
+            p[index][jndex] = node;
+            node = node -> next_v;
+        }
+        column = column->next_h;
+        jndex++;
+    }
+    printf("\n");
+    NODE* row = root->next_v;
+    for (int i=0; i<y_length; ++i){
+        printf("%d\t", row->index_v);
+        row = row->next_v;
+        for (int j=0; j<x_length;++j){
+            if (p[i][j] == NULL) printf("\t");
+            else printf("1\t");
+        }
+        printf("\n");
+    }
+    for (int i=0;i<100; ++i){
+        printf("=");
+    }
+    printf("\n");
+    free(p);
+}
 
 
 
@@ -173,55 +224,48 @@ NODE *find_minimal(){
 
 void algorithm_x(){
     if (is_ready) return;
-    NODE* temp = root_main;
-    int counter =0;
-    while (temp -> next_h != NULL){
-        temp = temp->next_h;
-        counter ++;
-    }
-    printf("%d\n", counter);
     if (root_main->next_h == NULL){
         is_ready = 1;
         return;
     }
     if (root_main->next_v == NULL) return;
     NODE *interested_column = find_minimal() -> next_v;
-
     while (interested_column != NULL && !is_ready){
         STACK *death_stack_rows = create_stack();
         STACK *death_stack_columns = create_stack();
 
-        NODE *i = interested_column;
+        NODE *i = find_root_horizontal(interested_column) ->next_h;
         while (i != NULL){
             push(death_stack_columns, find_root_vertical(i));
             i = i->next_h;
         }
         NODE *interested_row = find_root_horizontal(interested_column);
-        if (interested_row == root_main){
-            int c=0;
-        }
         push(result, interested_row);
         i = interested_row->next_h;
         while (i != NULL){
             NODE * j  = find_root_vertical(i)->next_v;
             while (j != NULL){
                 push(death_stack_rows, find_root_horizontal(j));
-                remove_row(find_root_horizontal(j));
                 j = j->next_v;
             }
             i = i->next_h;
+        }
+        for (int index=0;index<death_stack_rows->length;index++){
+            remove_row(death_stack_rows->data[index]);
         }
         for (int index=0;index<death_stack_columns->length;index++){
             remove_column(death_stack_columns->data[index]);
         }
         algorithm_x();
-        if (!is_ready) pop(result);
-        for (int index=0; index<death_stack_columns->length;index++){
-            restore_column(death_stack_columns->data[index]);
-        }
+        if (!is_ready)
+            pop(result);
         for(int index=0; index<death_stack_rows->length; index++){
             restore_row(death_stack_rows->data[index]);
         }
+        for (int index=0; index<death_stack_columns->length;index++){
+            restore_column(death_stack_columns->data[index]);
+        }
+
         interested_column = interested_column->next_v;
         delete_stack(death_stack_columns);
         delete_stack(death_stack_rows);
