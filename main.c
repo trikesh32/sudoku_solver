@@ -272,6 +272,54 @@ void algorithm_x(){
     }
 }
 
+
+void print_results(STACK* res){
+    int (*table)[N] = malloc(N * N * sizeof(int));
+    memset(table, 0, N * N * sizeof(int));
+    for (int i=0; i<N * N;++i){
+        int index = res->data[i]->index_v;
+        int full_coordinates = index % (N * N);
+        table[full_coordinates / N][full_coordinates % N] = (index / (N * N)) + 1;
+    }
+    for (int i=0; i<N;++i){
+        for (int j=0;j<N;++j){
+            printf("%d ", table[i][j]);
+        }
+        printf("\n");
+    }
+    free(table);
+}
+
+
+void delete_num(NODE *num_p){
+    STACK *death_stack_rows = create_stack();
+    STACK *death_stack_columns = create_stack();
+
+    NODE *i = num_p ->next_h;
+    while (i != NULL){
+        push(death_stack_columns, find_root_vertical(i));
+        i = i->next_h;
+    }
+    NODE *interested_row = num_p;
+    i = interested_row->next_h;
+    while (i != NULL){
+        NODE * j  = find_root_vertical(i)->next_v;
+        while (j != NULL){
+            push(death_stack_rows, find_root_horizontal(j));
+            j = j->next_v;
+        }
+        i = i->next_h;
+    }
+    for (int index=0;index<death_stack_rows->length;index++){
+        remove_row(death_stack_rows->data[index]);
+    }
+    for (int index=0;index<death_stack_columns->length;index++){
+        remove_column(death_stack_columns->data[index]);
+    }
+    delete_stack(death_stack_rows);
+    delete_stack(death_stack_columns);
+}
+
 int main(void) {
 
     root_nodes_v[0] = (NODE *) malloc(sizeof(NODE));
@@ -312,9 +360,26 @@ int main(void) {
             }
         }
     }
+    STACK *already_exist = create_stack();
+    for (int i=0; i<N;++i){
+        for (int j=0; j<N;++j){
+            int num; scanf("%d", &num);
+            if (num != 0){
+                num--;
+                NODE* node = root_nodes_v[num * N * N + i * N + j];
+                push(already_exist, node);
+                delete_num(node);
+            }
+        }
+    }
+
     result = create_stack();
+
     algorithm_x();
-    printf("%d", result->length);
+    for (int i=0; i<already_exist->length; ++i){
+        push(result, already_exist->data[i]);
+    }
+    print_results(result);
 
     for (int i = 0; i < HORIZONTAL_LENGTH; ++i) {
         free(root_nodes_h[i]);
@@ -327,5 +392,6 @@ int main(void) {
             free(nodes[i][j]);
     free(root_main);
     delete_stack(result);
+    delete_stack(already_exist);
     return 0;
 }
